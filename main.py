@@ -59,6 +59,63 @@ def mostrar_texto(tela, texto, cor, x, y, tamanho_fonte=30):
     superficie_texto = fonte.render(texto, True, cor)
     tela.blit(superficie_texto, (x, y))
 
+def dialogo_educacao_ambiental(tela):
+    dialogo_texto = [
+        "Bem-vindo ao Eco-Pac! Neste jogo, vamos combater os fantasmas da poluição.",
+        "Cada bolinha que você come representa uma ação sustentável.",
+        "Juntos, podemos cuidar do nosso planeta!",
+        "Pressione ESPAÇO para começar!"
+    ]
+    
+    tela.fill(PRETO)
+    y_offset = ALTURA_TELA // 3
+    for linha in dialogo_texto:
+        mostrar_texto(tela, linha, BRANCO, LARGURA_TELA // 2 - len(linha) * 5, y_offset, 25)
+        y_offset += 40
+    pygame.display.flip()
+
+    esperando_inicio = True
+    while esperando_inicio:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    esperando_inicio = False
+
+def menu_start(tela):
+    menu_opcoes = ["Iniciar Jogo", "Sair"]
+    opcao_selecionada = 0
+
+    while True:
+        tela.fill(PRETO)
+        mostrar_texto(tela, "PAC-MAN AMBIENTAL", AMARELO, LARGURA_TELA // 2 - 180, ALTURA_TELA // 4, 60)
+
+        y_offset = ALTURA_TELA // 2
+        for i, opcao in enumerate(menu_opcoes):
+            cor_texto = BRANCO
+            if i == opcao_selecionada:
+                cor_texto = AMARELO # Destaca a opção selecionada
+            mostrar_texto(tela, opcao, cor_texto, LARGURA_TELA // 2 - 70, y_offset, 40)
+            y_offset += 60
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "Sair"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    opcao_selecionada = (opcao_selecionada - 1) % len(menu_opcoes)
+                elif event.key == pygame.K_DOWN:
+                    opcao_selecionada = (opcao_selecionada + 1) % len(menu_opcoes)
+                elif event.key == pygame.K_RETURN: # Tecla Enter
+                    if opcao_selecionada == 0:
+                        return "Iniciar Jogo"
+                    elif opcao_selecionada == 1:
+                        return "Sair"
+
 # Inicialização de Pac-Man e Fantasmas
 pacman = Pacman(1 * TAMANHO_CELULA, 1 * TAMANHO_CELULA) # Inicia Pac-Man na primeira célula do caminho
 
@@ -68,6 +125,17 @@ fantasmas = [
     Fantasma(12 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, ROSA),
     Fantasma(13 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, CIANO),
 ]
+
+
+# Chama o menu de start
+escolha = menu_start(tela)
+
+# Chama o diálogo ambiental
+dialogo_educacao_ambiental(tela)
+
+if escolha == "Sair":
+    pygame.quit()
+    sys.exit()
 
 # Loop principal do jogo
 rodando = True
@@ -88,6 +156,8 @@ while rodando:
             elif event.key == pygame.K_DOWN:
                 pacman.direcao_x = 0
                 pacman.direcao_y = 1
+            elif event.key == pygame.K_ESCAPE:
+                rodando = False
 
     # Atualizar estado do jogo
     pacman.mover(MAPA)

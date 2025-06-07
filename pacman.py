@@ -1,5 +1,5 @@
 import pygame
-from config import TAMANHO_CELULA, AMARELO
+from config import TAMANHO_CELULA, AMARELO, SPRITE_PACMAN_DIREITA, SPRITE_PACMAN_ESQUERDA, SPRITE_PACMAN_CIMA, SPRITE_PACMAN_BAIXO
 from map import NUM_LINHAS, NUM_COLUNAS
 
 class Pacman:
@@ -11,6 +11,7 @@ class Pacman:
         self.velocidade = 5
         self.pontuacao = 0
         self.vidas = 3
+        self.sprite_atual = SPRITE_PACMAN_DIREITA # Começa com sprite para a direita
 
     def mover(self, mapa):
         # Tenta mover na direção atual
@@ -32,5 +33,15 @@ class Pacman:
                 self.direcao_x = 0
                 self.direcao_y = 0
 
+        if self.direcao_x == 1:
+            self.sprite_atual = SPRITE_PACMAN_DIREITA
+        elif self.direcao_x == -1:
+            self.sprite_atual = SPRITE_PACMAN_ESQUERDA
+        elif self.direcao_y == 1:
+            self.sprite_atual = SPRITE_PACMAN_BAIXO
+        elif self.direcao_y == -1:
+            self.sprite_atual = SPRITE_PACMAN_CIMA
+
+
     def desenhar(self, tela):
-        pygame.draw.circle(tela, AMARELO, (int(self.x + TAMANHO_CELULA / 2), int(self.y + TAMANHO_CELULA / 2)), TAMANHO_CELULA // 2 - 2)
+        tela.blit(self.sprite_atual, (self.x, self.y))
