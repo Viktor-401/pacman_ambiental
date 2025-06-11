@@ -1,5 +1,8 @@
+import sys, io, os
+buffer = io.StringIO()
+sys.stdout = sys.stderr = buffer
+
 import pygame
-import sys
 from config import *
 from map import *
 from pacman import Pacman
