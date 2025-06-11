@@ -1,14 +1,6 @@
 import pygame
 import sys, os
 
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except:
-        nase_path = os.path.abspath(".")
-
-    return os.path.join(base_path, relative_path)
-
 # Inicialização do Pygame
 pygame.init()
 
@@ -39,14 +31,14 @@ FPS = 30
 
 # Carrega as imagens dos sprites
 try:
-    SPRITE_PACMAN_DIREITA = pygame.image.load(resource_path('assets/heroi.png')).convert_alpha()
-    SPRITE_PACMAN_ESQUERDA = pygame.image.load(resource_path('assets/heroi.png')).convert_alpha()
-    SPRITE_PACMAN_CIMA = pygame.image.load(resource_path('assets/heroi.png')).convert_alpha()
-    SPRITE_PACMAN_BAIXO = pygame.image.load(resource_path('assets/heroi.png')).convert_alpha()
-    SPRITE_FANTASMA_VERMELHO = pygame.image.load(resource_path('assets/capitalismo.png')).convert_alpha()
-    SPRITE_FANTASMA_LARANJA = pygame.image.load(resource_path('assets/fabrica.png')).convert_alpha()
-    SPRITE_FANTASMA_ROSA = pygame.image.load(resource_path('assets/desmatamento.png')).convert_alpha()
-    SPRITE_FANTASMA_CIANO = pygame.image.load(resource_path('assets/queimada.png')).convert_alpha()
+    SPRITE_PACMAN_DIREITA = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_PACMAN_ESQUERDA = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_PACMAN_CIMA = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_PACMAN_BAIXO = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_FANTASMA_VERMELHO = pygame.image.load('assets/capitalismo.png').convert_alpha()
+    SPRITE_FANTASMA_LARANJA = pygame.image.load('assets/fabrica.png').convert_alpha()
+    SPRITE_FANTASMA_ROSA = pygame.image.load('assets/desmatamento.png').convert_alpha()
+    SPRITE_FANTASMA_CIANO = pygame.image.load('assets/queimada.png').convert_alpha()
 except pygame.error as e:
     print(f"Erro ao carregar sprite: {e}")
     print("Certifique-se de que as imagens estão na pasta 'assets'.")
