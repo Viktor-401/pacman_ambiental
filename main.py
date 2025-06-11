@@ -10,11 +10,11 @@ def desenhar_mapa(tela, mapa):
         for col_idx, celula in enumerate(linha):
             x = col_idx * TAMANHO_CELULA
             y = linha_idx * TAMANHO_CELULA
-            if celula == 1: # Parede
+            if celula == 1:  # Parede
                 pygame.draw.rect(tela, AZUL, (x, y, TAMANHO_CELULA, TAMANHO_CELULA))
-            elif celula == 2: # Bolinha de comida
+            elif celula == 2:  # Bolinha de comida
                 pygame.draw.circle(tela, BRANCO, (x + TAMANHO_CELULA // 2, y + TAMANHO_CELULA // 2), TAMANHO_CELULA // 4)
-            elif celula == 3: # Bolinha de poder (maior)
+            elif celula == 3:  # Bolinha de poder (maior)
                 pygame.draw.circle(tela, BRANCO, (x + TAMANHO_CELULA // 2, y + TAMANHO_CELULA // 2), TAMANHO_CELULA // 3)
 
 def verificar_colisoes(pacman, fantasmas, mapa):
@@ -25,32 +25,24 @@ def verificar_colisoes(pacman, fantasmas, mapa):
     if 0 <= celula_pacman_y < NUM_LINHAS and 0 <= celula_pacman_x < NUM_COLUNAS:
         if mapa[celula_pacman_y][celula_pacman_x] == 2:
             pacman.pontuacao += 10
-            mapa[celula_pacman_y][celula_pacman_x] = 0 # Remove a bolinha
+            mapa[celula_pacman_y][celula_pacman_x] = 0  # Remove a bolinha
         elif mapa[celula_pacman_y][celula_pacman_x] == 3:
             pacman.pontuacao += 50
-            # Ativa o modo "Power-Up" (fantasmas ficam azuis, Pac-Man pode comê-los)
-            # Isso exigiria mais lógica: timer para o power-up, mudança de estado dos fantasmas.
             mapa[celula_pacman_y][celula_pacman_x] = 0
 
-    # Colisão Pac-Man com fantasma (simplificado: se as caixas de colisão se sobrepõem)
+    # Colisão Pac-Man com fantasma
+    rect_pacman = pygame.Rect(pacman.x, pacman.y, TAMANHO_CELULA, TAMANHO_CELULA)
     for fantasma in fantasmas:
-        # Usar pygame.Rect para detecção de colisão mais precisa
-        rect_pacman = pygame.Rect(pacman.x, pacman.y, TAMANHO_CELULA, TAMANHO_CELULA)
         rect_fantasma = pygame.Rect(fantasma.x, fantasma.y, TAMANHO_CELULA, TAMANHO_CELULA)
-
         if rect_pacman.colliderect(rect_fantasma):
-            if True: # Aqui você verificaria se o Pac-Man está no modo "Power-Up"
-                # Se Pac-Man estiver comendo fantasmas, o fantasma volta para a base
-                fantasma.x = 10 * TAMANHO_CELULA # Volta para a posição inicial (ou uma "casa" para fantasmas)
-                fantasma.y = 7 * TAMANHO_CELULA
-                pacman.pontuacao += 200
-            else:
-                # Se não estiver em power-up, Pac-Man perde uma vida
+            if not pacman.invencivel:
                 pacman.vidas -= 1
+                pacman.invencivel = True
+                pacman.tempo_invencivel = 2000  # 2 segundos invencível
                 # Resetar posições
                 pacman.x = 1 * TAMANHO_CELULA
                 pacman.y = 1 * TAMANHO_CELULA
-                for f in fantasmas: # Resetar fantasmas também
+                for f in fantasmas:
                     f.x = 10 * TAMANHO_CELULA
                     f.y = 7 * TAMANHO_CELULA
 
@@ -96,7 +88,7 @@ def menu_start(tela):
         for i, opcao in enumerate(menu_opcoes):
             cor_texto = BRANCO
             if i == opcao_selecionada:
-                cor_texto = AMARELO # Destaca a opção selecionada
+                cor_texto = AMARELO
             mostrar_texto(tela, opcao, cor_texto, LARGURA_TELA // 2 - 70, y_offset, 40)
             y_offset += 60
 
@@ -110,14 +102,20 @@ def menu_start(tela):
                     opcao_selecionada = (opcao_selecionada - 1) % len(menu_opcoes)
                 elif event.key == pygame.K_DOWN:
                     opcao_selecionada = (opcao_selecionada + 1) % len(menu_opcoes)
-                elif event.key == pygame.K_RETURN: # Tecla Enter
+                elif event.key == pygame.K_RETURN:
                     if opcao_selecionada == 0:
                         return "Iniciar Jogo"
                     elif opcao_selecionada == 1:
                         return "Sair"
 
+# Inicialização do Pygame e da tela
+pygame.init()
+tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
+pygame.display.set_caption("Eco-Pac")
+clock = pygame.time.Clock()
+
 # Inicialização de Pac-Man e Fantasmas
-pacman = Pacman(1 * TAMANHO_CELULA, 1 * TAMANHO_CELULA) # Inicia Pac-Man na primeira célula do caminho
+pacman = Pacman(1 * TAMANHO_CELULA, 1 * TAMANHO_CELULA)
 
 fantasmas = [
     Fantasma(10 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, VERMELHO),
@@ -125,7 +123,6 @@ fantasmas = [
     Fantasma(12 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, ROSA),
     Fantasma(13 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, CIANO),
 ]
-
 
 # Chama o menu de start
 escolha = menu_start(tela)
@@ -137,9 +134,10 @@ if escolha == "Sair":
     pygame.quit()
     sys.exit()
 
-# Loop principal do jogo
 rodando = True
 while rodando:
+    dt = clock.tick(FPS)  # tempo desde último frame (ms)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
@@ -159,14 +157,15 @@ while rodando:
             elif event.key == pygame.K_ESCAPE:
                 rodando = False
 
-    # Atualizar estado do jogo
     pacman.mover(MAPA)
     for fantasma in fantasmas:
-        fantasma.mover(MAPA, pacman) # Passa o Pac-Man para o fantasma poder persegui-lo
-    verificar_colisoes(pacman, fantasmas, MAPA)
+        fantasma.mover(MAPA, pacman, fantasmas)
 
-    # Desenhar
-    tela.fill(PRETO) # Limpa a tela
+    verificar_colisoes(pacman, fantasmas, MAPA)
+    pacman.atualizar_invencibilidade(dt)
+
+    # Desenhar tudo
+    tela.fill(PRETO)
     desenhar_mapa(tela, MAPA)
     pacman.desenhar(tela)
     for fantasma in fantasmas:
@@ -175,15 +174,13 @@ while rodando:
     mostrar_texto(tela, f"Pontuação: {pacman.pontuacao}", BRANCO, 10, ALTURA_TELA - 40)
     mostrar_texto(tela, f"Vidas: {pacman.vidas}", BRANCO, LARGURA_TELA - 100, ALTURA_TELA - 40)
 
-    # Lógica de fim de jogo
     if pacman.vidas <= 0:
         mostrar_texto(tela, "GAME OVER!", VERMELHO, LARGURA_TELA // 2 - 100, ALTURA_TELA // 2 - 30, 50)
         pygame.display.flip()
-        pygame.time.wait(3000) # Espera 3 segundos
+        pygame.time.wait(3000)
         rodando = False
 
-    pygame.display.flip() # Atualiza a tela
-    clock.tick(FPS) # Controla a taxa de quadros
+    pygame.display.flip()
 
 pygame.quit()
 sys.exit()

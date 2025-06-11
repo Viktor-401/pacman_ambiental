@@ -6,12 +6,14 @@ class Pacman:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.velocidade = 5
         self.direcao_x = 0
         self.direcao_y = 0
-        self.velocidade = 5
-        self.pontuacao = 0
         self.vidas = 3
-        self.sprite_atual = SPRITE_PACMAN_DIREITA # Começa com sprite para a direita
+        self.pontuacao = 0
+        self.invencivel = False
+        self.tempo_invencivel = 0  # tempo restante da invencibilidade em ms
+        self.sprite_atual = SPRITE_PACMAN_DIREITA
 
     def mover(self, mapa):
         # Tenta mover na direção atual
@@ -45,3 +47,10 @@ class Pacman:
 
     def desenhar(self, tela):
         tela.blit(self.sprite_atual, (self.x, self.y))
+
+    def atualizar_invencibilidade(self, dt):
+        if self.invencivel:
+            self.tempo_invencivel -= dt
+            if self.tempo_invencivel <= 0:
+                self.invencivel = False
+                self.tempo_invencivel = 0
