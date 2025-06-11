@@ -1,7 +1,4 @@
 import sys, io, os
-buffer = io.StringIO()
-sys.stdout = sys.stderr = buffer
-
 import pygame
 from config import *
 from map import *
