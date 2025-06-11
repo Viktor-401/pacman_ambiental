@@ -11,11 +11,14 @@ def desenhar_mapa(tela, mapa):
             x = col_idx * TAMANHO_CELULA
             y = linha_idx * TAMANHO_CELULA
             if celula == 1:  # Parede
-                pygame.draw.rect(tela, AZUL, (x, y, TAMANHO_CELULA, TAMANHO_CELULA))
+                pygame.draw.rect(tela, VERDE_ESCURO, (x, y, TAMANHO_CELULA, TAMANHO_CELULA))
             elif celula == 2:  # Bolinha de comida
+                pygame.draw.rect(tela, LARANJA, (x, y, TAMANHO_CELULA, TAMANHO_CELULA))
                 pygame.draw.circle(tela, BRANCO, (x + TAMANHO_CELULA // 2, y + TAMANHO_CELULA // 2), TAMANHO_CELULA // 4)
             elif celula == 3:  # Bolinha de poder (maior)
                 pygame.draw.circle(tela, BRANCO, (x + TAMANHO_CELULA // 2, y + TAMANHO_CELULA // 2), TAMANHO_CELULA // 3)
+            elif celula == 0:  # Espaço vazio
+                pygame.draw.rect(tela, LARANJA, (x, y, TAMANHO_CELULA, TAMANHO_CELULA))
 
 def verificar_colisoes(pacman, fantasmas, mapa):
     # Colisão Pac-Man com comida
@@ -42,9 +45,6 @@ def verificar_colisoes(pacman, fantasmas, mapa):
                 # Resetar posições
                 pacman.x = 1 * TAMANHO_CELULA
                 pacman.y = 1 * TAMANHO_CELULA
-                for f in fantasmas:
-                    f.x = 10 * TAMANHO_CELULA
-                    f.y = 7 * TAMANHO_CELULA
 
 def mostrar_texto(tela, texto, cor, x, y, tamanho_fonte=30):
     fonte = pygame.font.Font(None, tamanho_fonte)
@@ -53,17 +53,31 @@ def mostrar_texto(tela, texto, cor, x, y, tamanho_fonte=30):
 
 def dialogo_educacao_ambiental(tela):
     dialogo_texto = [
-        "Bem-vindo ao Eco-Pac! Neste jogo, vamos combater os fantasmas da poluição.",
-        "Cada bolinha que você come representa uma ação sustentável.",
+        "Bem-vindo ao Eco-Pac! Neste jogo, vamos combater os fantasmas da poluição:",
+        "As industrias poluentes, o desmatamento e as queimadas, na busca pelo maior acumulo de capital.",
+        "Cada bolinha que você come representa uma ação sustentável e menos poder para os fantasmas.",
         "Juntos, podemos cuidar do nosso planeta!",
-        "Pressione ESPAÇO para começar!"
+        "Pressione Enter para começar!"
     ]
-    
-    tela.fill(PRETO)
+
+    tela.fill(VERDE_ESCURO)
     y_offset = ALTURA_TELA // 3
     for linha in dialogo_texto:
         mostrar_texto(tela, linha, BRANCO, LARGURA_TELA // 2 - len(linha) * 5, y_offset, 25)
         y_offset += 40
+
+    imagens = [
+        SPRITE_FANTASMA_VERMELHO,
+        SPRITE_FANTASMA_LARANJA, SPRITE_FANTASMA_ROSA, SPRITE_FANTASMA_CIANO]
+    
+    imagem = pygame.transform.scale(SPRITE_PACMAN_BAIXO, (64, 64))
+    tela.blit(imagem, (LARGURA_TELA // 2 - 250, ALTURA_TELA // 6))
+    
+
+    for i, sprite in enumerate(imagens):
+        imagem = pygame.transform.scale(sprite, (64, 64))
+        tela.blit(imagem, (LARGURA_TELA // 2 - 30 + (i * 70), ALTURA_TELA // 6))
+
     pygame.display.flip()
 
     esperando_inicio = True
@@ -73,7 +87,7 @@ def dialogo_educacao_ambiental(tela):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_RETURN:
                     esperando_inicio = False
 
 def menu_start(tela):
@@ -81,7 +95,7 @@ def menu_start(tela):
     opcao_selecionada = 0
 
     while True:
-        tela.fill(PRETO)
+        tela.fill(VERDE_ESCURO)
         mostrar_texto(tela, "PAC-MAN AMBIENTAL", AMARELO, LARGURA_TELA // 2 - 180, ALTURA_TELA // 4, 60)
 
         y_offset = ALTURA_TELA // 2
@@ -119,9 +133,9 @@ pacman = Pacman(1 * TAMANHO_CELULA, 1 * TAMANHO_CELULA)
 
 fantasmas = [
     Fantasma(10 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, VERMELHO),
-    Fantasma(11 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, LARANJA),
-    Fantasma(12 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, ROSA),
-    Fantasma(13 * TAMANHO_CELULA, 7 * TAMANHO_CELULA, CIANO),
+    Fantasma(1 * TAMANHO_CELULA, (NUM_LINHAS-2) * TAMANHO_CELULA, LARANJA),
+    Fantasma((NUM_COLUNAS-2) * TAMANHO_CELULA, (NUM_LINHAS-2) * TAMANHO_CELULA, ROSA),
+    Fantasma((NUM_LINHAS-2) * TAMANHO_CELULA, 1 * TAMANHO_CELULA, CIANO),
 ]
 
 # Chama o menu de start
@@ -165,14 +179,14 @@ while rodando:
     pacman.atualizar_invencibilidade(dt)
 
     # Desenhar tudo
-    tela.fill(PRETO)
+    tela.fill(BRANCO)
     desenhar_mapa(tela, MAPA)
     pacman.desenhar(tela)
     for fantasma in fantasmas:
         fantasma.desenhar(tela)
 
-    mostrar_texto(tela, f"Pontuação: {pacman.pontuacao}", BRANCO, 10, ALTURA_TELA - 40)
-    mostrar_texto(tela, f"Vidas: {pacman.vidas}", BRANCO, LARGURA_TELA - 100, ALTURA_TELA - 40)
+    mostrar_texto(tela, f"Pontuação: {pacman.pontuacao}", PRETO, 10, ALTURA_TELA - 40)
+    mostrar_texto(tela, f"Vidas: {pacman.vidas}", PRETO, LARGURA_TELA - 100, ALTURA_TELA - 40)
 
     if pacman.vidas <= 0:
         mostrar_texto(tela, "GAME OVER!", VERMELHO, LARGURA_TELA // 2 - 100, ALTURA_TELA // 2 - 30, 50)

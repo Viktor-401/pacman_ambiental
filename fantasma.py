@@ -10,92 +10,122 @@ class Fantasma:
         self.x = x
         self.y = y
         self.cor = cor
-        self.velocidade = 3
+        self.velocidade = 1
         self.direcao_x = 0
         self.direcao_y = 0
         self.sprite_atual = SPRITES_FANTASMAS[cor]
 
     def mover(self, mapa, pacman, outros_fantasmas):
-        # Primeiro, calcula vetor para fugir de fantasmas próximos
-        afastar_x, afastar_y = 0, 0
-        for f in outros_fantasmas:
-            if f is self:
-                continue
-            dist = math.hypot(self.x - f.x, self.y - f.y)
-            if dist < DISTANCIA_MINIMA and dist > 0:
-                # vetor de afastamento (normalizado e inverso da direção)
-                afastar_x += (self.x - f.x) / dist
-                afastar_y += (self.y - f.y) / dist
-        
-        # Se está perto de algum fantasma, tenta se afastar
-        if afastar_x != 0 or afastar_y != 0:
-            norm = math.hypot(afastar_x, afastar_y)
-            afastar_x /= norm
-            afastar_y /= norm
-
-            tentativa_x = self.x + afastar_x * self.velocidade
-            tentativa_y = self.y + afastar_y * self.velocidade
-
-            if not self.colisao_parede(tentativa_x, tentativa_y, mapa):
-                self.x = tentativa_x
-                self.y = tentativa_y
-                self.direcao_x = afastar_x
-                self.direcao_y = afastar_y
-                return
-
-        # Se não precisa fugir, move normalmente em direção ao Pac-Man
         dx = pacman.x - self.x
         dy = pacman.y - self.y
-
-        # Prioriza X
-        if dx > 0:
-            tentativa_x = self.x + self.velocidade
-            celula_alvo_x = int(tentativa_x / TAMANHO_CELULA)
-            celula_fantasma_y = int(self.y / TAMANHO_CELULA)
-            if 0 <= celula_alvo_x < NUM_COLUNAS and mapa[celula_fantasma_y][celula_alvo_x] != 1:
-                self.x = tentativa_x
-                self.direcao_x = 1
-                self.direcao_y = 0
-                return
-        elif dx < 0:
-            tentativa_x = self.x - self.velocidade
-            celula_alvo_x = int(tentativa_x / TAMANHO_CELULA)
-            celula_fantasma_y = int(self.y / TAMANHO_CELULA)
-            if 0 <= celula_alvo_x < NUM_COLUNAS and mapa[celula_fantasma_y][celula_alvo_x] != 1:
-                self.x = tentativa_x
-                self.direcao_x = -1
-                self.direcao_y = 0
-                return
-
-        # Depois Y
-        if dy > 0:
-            tentativa_y = self.y + self.velocidade
-            celula_alvo_y = int(tentativa_y / TAMANHO_CELULA)
-            celula_fantasma_x = int(self.x / TAMANHO_CELULA)
-            if 0 <= celula_alvo_y < NUM_LINHAS and mapa[celula_alvo_y][celula_fantasma_x] != 1:
-                self.y = tentativa_y
-                self.direcao_y = 1
-                self.direcao_x = 0
-                return
-        elif dy < 0:
-            tentativa_y = self.y - self.velocidade
-            celula_alvo_y = int(tentativa_y / TAMANHO_CELULA)
-            celula_fantasma_x = int(self.x / TAMANHO_CELULA)
-            if 0 <= celula_alvo_y < NUM_LINHAS and mapa[celula_alvo_y][celula_fantasma_x] != 1:
-                self.y = tentativa_y
-                self.direcao_y = -1
-                self.direcao_x = 0
-                return
+        # # Evita aproximação excessiva de outros fantasmas
+        # for outro in outros_fantasmas:
+        #     if outro is self:
+        #         continue
+        #     distancia = math.hypot(self.x - outro.x, self.y - outro.y)
+        #     if distancia < DISTANCIA_MINIMA:
+        #         # Move-se na direção oposta ao outro fantasma
+        #         afastar_x = self.x - outro.x
+        #         afastar_y = self.y - outro.y
+        #         norm = math.hypot(afastar_x, afastar_y)
+        #         if norm != 0:
+        #             afastar_x /= norm
+        #             afastar_y /= norm
+        #             tentativa_x = self.x + afastar_x * self.velocidade
+        #             tentativa_y = self.y + afastar_y * self.velocidade
+        #             if not self.colisao_parede(tentativa_x, tentativa_y, mapa):
+        #                 self.x = tentativa_x
+        #                 self.y = tentativa_y
+        #                 self.direcao_x = int(round(afastar_x))
+        #                 self.direcao_y = int(round(afastar_y))
+        #                 return
+        # Decide qual eixo priorizar baseado na distância absoluta
+        if abs(dx) > abs(dy):
+            # Tenta mover no eixo X primeiro
+            if dx > 0:
+                tentativa_x = self.x + self.velocidade
+                if not self.colisao_parede(tentativa_x, self.y, mapa):
+                    self.x = tentativa_x
+                    self.direcao_x = 1
+                    self.direcao_y = 0
+                    return
+            elif dx < 0:
+                tentativa_x = self.x - self.velocidade
+                if not self.colisao_parede(tentativa_x, self.y, mapa):
+                    self.x = tentativa_x
+                    self.direcao_x = -1
+                    self.direcao_y = 0
+                    return
+            # Se não conseguiu mover em X, tenta Y
+            if dy > 0:
+                tentativa_y = self.y + self.velocidade
+                if not self.colisao_parede(self.x, tentativa_y, mapa):
+                    self.y = tentativa_y
+                    self.direcao_y = 1
+                    self.direcao_x = 0
+                    return
+            elif dy < 0:
+                tentativa_y = self.y - self.velocidade
+                if not self.colisao_parede(self.x, tentativa_y, mapa):
+                    self.y = tentativa_y
+                    self.direcao_y = -1
+                    self.direcao_x = 0
+                    return
+        else:
+            # Tenta mover no eixo Y primeiro
+            if dy > 0:
+                tentativa_y = self.y + self.velocidade
+                if not self.colisao_parede(self.x, tentativa_y, mapa):
+                    self.y = tentativa_y
+                    self.direcao_y = 1
+                    self.direcao_x = 0
+                    return
+            elif dy < 0:
+                tentativa_y = self.y - self.velocidade
+                if not self.colisao_parede(self.x, tentativa_y, mapa):
+                    self.y = tentativa_y
+                    self.direcao_y = -1
+                    self.direcao_x = 0
+                    return
+            # Se não conseguiu mover em Y, tenta X
+            if dx > 0:
+                tentativa_x = self.x + self.velocidade
+                if not self.colisao_parede(tentativa_x, self.y, mapa):
+                    self.x = tentativa_x
+                    self.direcao_x = 1
+                    self.direcao_y = 0
+                    return
+            elif dx < 0:
+                tentativa_x = self.x - self.velocidade
+                if not self.colisao_parede(tentativa_x, self.y, mapa):
+                    self.x = tentativa_x
+                    self.direcao_x = -1
+                    self.direcao_y = 0
+                    return
 
         # Se não conseguiu andar em X nem Y, tenta movimentos aleatórios
         self.tenta_mover_aleatoriamente(mapa)
 
     def colisao_parede(self, x, y, mapa):
-        cel_x = int(x / TAMANHO_CELULA)
-        cel_y = int(y / TAMANHO_CELULA)
-        if cel_y < 0 or cel_y >= NUM_LINHAS or cel_x < 0 or cel_x >= NUM_COLUNAS:
-            return True
-        return mapa[cel_y][cel_x] == 1
+                # Dimensões do Pacman (assume quadrado do tamanho da célula)
+        tamanho = TAMANHO_CELULA
+
+        # Calcula os quatro cantos após o movimento
+        cantos = [
+            (x, y),  # canto superior esquerdo
+            (x + tamanho - 1, y),  # canto superior direito
+            (x, y + tamanho - 1),  # canto inferior esquerdo
+            (x + tamanho - 1, y + tamanho - 1)  # canto inferior direito
+        ]
+
+        for cx, cy in cantos:
+            celula_x = int(cx / TAMANHO_CELULA)
+            celula_y = int(cy / TAMANHO_CELULA)
+            if not (0 <= celula_x < NUM_COLUNAS and 0 <= celula_y < NUM_LINHAS):
+                return True
+            if mapa[celula_y][celula_x] == 1:
+                return True
+        return False
 
     def tenta_mover_aleatoriamente(self, mapa):
         possiveis_movimentos = [(0,1),(0,-1),(1,0),(-1,0)]

@@ -5,14 +5,16 @@ import sys
 pygame.init()
 
 # Dimensões da tela
-LARGURA_TELA = 800
-ALTURA_TELA = 600
+LARGURA_TELA = 1080
+ALTURA_TELA = 720
 TAMANHO_CELULA = 20  # Tamanho de cada "quadradinho" no mapa
 
 # Cores
 PRETO = (0, 0, 0)
 AMARELO = (255, 255, 0)
 BRANCO = (255, 255, 255)
+VERDE = (0, 255, 0)
+VERDE_ESCURO = (0, 120, 0)
 AZUL = (0, 0, 255)
 VERMELHO = (255, 0, 0)
 LARANJA = (255, 165, 0)
@@ -29,14 +31,14 @@ FPS = 30
 
 # Carrega as imagens dos sprites
 try:
-    SPRITE_PACMAN_DIREITA = pygame.image.load('assets/pacman_right.png').convert_alpha()
-    SPRITE_PACMAN_ESQUERDA = pygame.image.load('assets/pacman_left.png').convert_alpha()
-    SPRITE_PACMAN_CIMA = pygame.image.load('assets/pacman_up.png').convert_alpha()
-    SPRITE_PACMAN_BAIXO = pygame.image.load('assets/pacman_down.png').convert_alpha()
-    SPRITE_FANTASMA_VERMELHO = pygame.image.load('assets/ghost_red.png').convert_alpha()
-    SPRITE_FANTASMA_LARANJA = pygame.image.load('assets/ghost_orange.png').convert_alpha()
-    SPRITE_FANTASMA_ROSA = pygame.image.load('assets/ghost_pink.png').convert_alpha()
-    SPRITE_FANTASMA_CIANO = pygame.image.load('assets/ghost_cyan.png').convert_alpha()
+    SPRITE_PACMAN_DIREITA = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_PACMAN_ESQUERDA = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_PACMAN_CIMA = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_PACMAN_BAIXO = pygame.image.load('assets/heroi.png').convert_alpha()
+    SPRITE_FANTASMA_VERMELHO = pygame.image.load('assets/capitalismo.png').convert_alpha()
+    SPRITE_FANTASMA_LARANJA = pygame.image.load('assets/fabrica.png').convert_alpha()
+    SPRITE_FANTASMA_ROSA = pygame.image.load('assets/desmatamento.png').convert_alpha()
+    SPRITE_FANTASMA_CIANO = pygame.image.load('assets/queimada.png').convert_alpha()
 except pygame.error as e:
     print(f"Erro ao carregar sprite: {e}")
     print("Certifique-se de que as imagens estão na pasta 'assets'.")

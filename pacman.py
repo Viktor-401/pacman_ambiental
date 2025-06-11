@@ -6,7 +6,7 @@ class Pacman:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.velocidade = 5
+        self.velocidade = 2
         self.direcao_x = 0
         self.direcao_y = 0
         self.vidas = 3
@@ -16,24 +16,35 @@ class Pacman:
         self.sprite_atual = SPRITE_PACMAN_DIREITA
 
     def mover(self, mapa):
-        # Tenta mover na direção atual
+        # Calcula a nova posição pretendida
         nova_x = self.x + self.direcao_x * self.velocidade
         nova_y = self.y + self.direcao_y * self.velocidade
 
-        # Verifica colisão com paredes (simplificado para células)
-        # Mais robusto seria verificar os 4 cantos do Pac-Man
-        proxima_celula_x = int(nova_x / TAMANHO_CELULA)
-        proxima_celula_y = int(nova_y / TAMANHO_CELULA)
+        # Dimensões do Pacman (assume quadrado do tamanho da célula)
+        tamanho = 14
 
-        # Garante que não saia dos limites do mapa
-        if 0 <= proxima_celula_y < NUM_LINHAS and 0 <= proxima_celula_x < NUM_COLUNAS:
-            if mapa[proxima_celula_y][proxima_celula_x] != 1:  # Se não for parede
-                self.x = nova_x
-                self.y = nova_y
-            else:
-                # Se colidir com parede, para de mover nessa direção
-                self.direcao_x = 0
-                self.direcao_y = 0
+        # Calcula os quatro cantos após o movimento
+        cantos = [
+            (nova_x, nova_y),  # canto superior esquerdo
+            (nova_x + tamanho - 1, nova_y),  # canto superior direito
+            (nova_x, nova_y + tamanho - 1),  # canto inferior esquerdo
+            (nova_x + tamanho - 1, nova_y + tamanho - 1)  # canto inferior direito
+        ]
+
+        pode_mover = True
+        for cx, cy in cantos:
+            celula_x = int(cx / TAMANHO_CELULA)
+            celula_y = int(cy / TAMANHO_CELULA)
+            if not (0 <= celula_x < NUM_COLUNAS and 0 <= celula_y < NUM_LINHAS):
+                pode_mover = False
+                break
+            if mapa[celula_y][celula_x] == 1:
+                pode_mover = False
+                break
+
+        if pode_mover:
+            self.x = nova_x
+            self.y = nova_y
 
         if self.direcao_x == 1:
             self.sprite_atual = SPRITE_PACMAN_DIREITA
